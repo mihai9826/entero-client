@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Calendar from 'react-calendar';
 
 import Patients from './containers/Patients/Patients';
+import SearchBox from './components/SearchBox/SearchBox';
 import ErrorBoundary from './containers/ErrorBoundary/ErrorBoundary';
 
 //import './App.css';
@@ -9,7 +10,8 @@ import ErrorBoundary from './containers/ErrorBoundary/ErrorBoundary';
 class App extends Component {
 
   state = {
-    dateFilter: ''
+    dateFilter: '',
+    searchBox: ''
   }
 
   dateFilterHandler = (value) => {
@@ -17,6 +19,12 @@ class App extends Component {
     const parsed = value.getFullYear() + '-' + (((value.getMonth() + 1) < 10) ? '0' : '') + (value.getMonth() + 1) + '-' + ((value.getDate() < 10) ? '0' : '') + value.getDate();
     //console.log(parsed);
     this.setState({ dateFilter: parsed });
+  }
+
+  searchEventHandler = (e) => {
+
+    this.setState({ searchBox: e.target.value });
+
   }
 
 
@@ -35,14 +43,17 @@ class App extends Component {
         <Calendar
           onClickDay={this.dateFilterHandler}
         />
+        <SearchBox search={this.searchEventHandler} />
         {(this.state.dateFilter === '') ? (
           <ErrorBoundary>
-            <Patients url={'http://localhost:8081/api/patients'} />
+            <Patients url={'http://localhost:8081/api/patients'}
+              searchInput={this.state.searchBox} />
           </ErrorBoundary>
         ) : null}
         {this.state.dateFilter ? (
           <ErrorBoundary>
-            <Patients url={'http://localhost:8081/api/patients?date=' + this.state.dateFilter} />
+            <Patients url={'http://localhost:8081/api/patients?date=' + this.state.dateFilter}
+              searchInput={this.state.searchBox} />
           </ErrorBoundary>
         ) : null}
 

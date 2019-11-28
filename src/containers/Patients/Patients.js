@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import axios from 'axios';
 
 import Patient from '../../components/Patient/Patient';
-import SearchBox from '../../components/SearchBox/SearchBox';
 import PatientsTable from '../../components/PatientsTable/PatientsTable';
 
 
@@ -10,7 +9,6 @@ class Patients extends Component {
     state = {
         patients: [],
         showDetails: [],
-        searchBox: '',
         error: false,
     }
 
@@ -30,6 +28,20 @@ class Patients extends Component {
         console.log('[Patients.js] did mount');
     }
 
+    static getDerivedStateFromProps(props, state) {
+        console.log('[Patients.js] getDerivedStateFromProps');
+        console.log(state.patients);
+        if (props.searchInput) {
+            const bool = state.patients.some(patient => patient.ssn.startsWith(props.searchInput));
+            if (props.error !== !bool) {
+                return { error: !bool };
+            }
+        }
+
+        return null;
+
+    }
+
 
 
     componentDidUpdate = () => {
@@ -37,16 +49,6 @@ class Patients extends Component {
         console.log('[Patients.js] did update');
     }
 
-    searchEventHandler = (e) => {
-
-        if (e.target.value === '') {
-            this.setState({ searchBox: e.target.value, error: false });
-        } else {
-            const bool = this.state.patients.some(patient => patient.ssn.startsWith(e.target.value));
-            this.setState({ searchBox: e.target.value, error: !bool });
-        }
-
-    }
 
 
     showPatientDetails = (patientIndex) => {
@@ -59,13 +61,10 @@ class Patients extends Component {
 
         let response;
         if (this.state.error) {
-            // response = (
-            //     <h3>Patients not found</h3>
-            // );
             throw new Error('error...');
         } else {
             let patients = this.state.patients.map((patient, index) => {
-                if (patient.ssn.startsWith(this.state.searchBox)) {
+                if (patient.ssn.startsWith(this.props.searchInput)) {
                     return <Patient
                         key={patient.ssn}
                         ssn={patient.ssn}
@@ -85,10 +84,12 @@ class Patients extends Component {
         }
         return (
             <div>
-                <SearchBox search={this.searchEventHandler} />
                 {response}
             </div>
+
         );
+
+
     }
 }
 
